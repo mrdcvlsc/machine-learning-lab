@@ -16,7 +16,9 @@ class model_mlr:
         return y_hat
     
     def train(self,Xij_data,Yi_data):
-
+        
+        # function to get the beta coefficients
+        
         inner = X.T.dot(X) # get the X transpose multiplied by X (X^T*X)
 
         inner_inverse = np.linalg.inv(inner) # get the inverse of the result of X transpose multiplied by X (X^T*X)^-1
