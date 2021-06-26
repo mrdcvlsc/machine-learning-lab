@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     # the X matrix should have each independent variables as columns, see the result below
     X = np.array([x0_ones,x1,x2])
-    X = X.T
+    X = X.T # we transpose here to make our x variables align as columns not by rows
 
     print('X : \n',X)
     print('y : \n',y)
