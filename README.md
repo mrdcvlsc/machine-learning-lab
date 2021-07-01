@@ -1,2 +1,2 @@
 # mymllab
-Just some ML practice stuffs
+a dump for my machine learning practice outputs
