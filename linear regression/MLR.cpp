@@ -1,3 +1,4 @@
+// cpp version of MLR.py
 #include <iostream>
 #include <cyfre/cyfre.hpp>
 
@@ -22,21 +23,9 @@ class linear_regression
 
         void train(const cyfre::mat<T>& X, const cyfre::mat<T>& Y)
         {
-            std::cout<<"X^T*X\n";
-
-            std::cout<<"X = ";
-            cyfre::display(X);
-
-            std::cout<<"\nX transpose = ";
-            cyfre::display(cyfre::transpose(X));
-
             cyfre::mat<T> inner = cyfre::transpose(X)*X;
-            
-            std::cout<<"(X^T*X)^-1\n";
             inner.inv();
-            std::cout<<"((X^T*X)^-1)*X^T\n";
             cyfre::mat<T> inverse_mul_XT = inner*cyfre::transpose(X);
-            std::cout<<"(((X^T*X)^-1)*X^T)*Y^T\n";
             cyfre::mat<T> b_hat = inverse_mul_XT*cyfre::transpose(Y);
             weights = cyfre::transpose(b_hat);
         }
