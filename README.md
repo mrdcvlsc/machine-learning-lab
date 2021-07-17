@@ -1,2 +1,3 @@
 # mymllab
-a dump for my machine learning practice outputs, where I tried to implement machine learning algorithms from scratch (kinda)
+dump for my machine learning implementation outputs.
+Here I tried to implement machine learning algorithms from scratch (kinda)
