@@ -15,6 +15,7 @@ torch.save(state,'PATH/FILE.pth')
 
 # loading a model 2
 checkpoint = torch.load('PATH/FILE.pth')
+model = modelClass()
 model.load_state_dict(checkpoint['state_dict'])
 optimizer.load_state_dict(checkpoint['optimizer'])
 epoch = checkpoint['epoch']
