@@ -1,28 +1,45 @@
-# saving a model 1
-torch.save(model.state_dict(),'/PATH/FILENAME.pth')
+=====================================================================================
 
-# loading a model 1
-model = modelClass()
-model = load_state_dict(torch.load('/PATH/FILENAME.pth')
+                        WAYS IN SAVING PYTORCH MODELS
 
-# saving a model 2
-state = {
-        'epoch': epoch,
-        'state_dict': model.state_dict(),
-        'optimizer': optimizer.state_dict(),
-}
-torch.save(state,'PATH/FILE.pth')
+=====================================================================================
 
-# loading a model 2
-checkpoint = torch.load('PATH/FILE.pth')
-model = modelClass()
-model.load_state_dict(checkpoint['state_dict'])
-optimizer.load_state_dict(checkpoint['optimizer'])
-epoch = checkpoint['epoch']
+# saving a model 1:
+        
+        torch.save(model.state_dict(),'/PATH/FILENAME.pth')
 
+# loading a model 1:
 
-# saving model 3
-torch.save(model, 'PATH/FILE.pth')
+        model = modelClass()
+        model = load_state_dict(torch.load('/PATH/FILENAME.pth')
 
-# saving model 3
-model = torch.load('PATH/FILE.pth')
+=====================================================================================
+
+# saving a model 2:
+
+        state = {
+                'epoch': epoch,
+                'state_dict': model.state_dict(),
+                'optimizer': optimizer.state_dict(),
+        }
+        torch.save(state,'PATH/FILE.pth')
+
+# loading a model 2:
+
+        checkpoint = torch.load('PATH/FILE.pth')
+        model = modelClass()
+        model.load_state_dict(checkpoint['state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        epoch = checkpoint['epoch']
+
+=====================================================================================
+
+# saving model 3:
+
+        torch.save(model, 'PATH/FILE.pth')
+
+# loading model 3:
+
+        model = torch.load('PATH/FILE.pth')
+
+=====================================================================================
