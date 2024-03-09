@@ -2,6 +2,7 @@
 # all gradients/partial derivatives are calculated and
 # mapped by hand and the neural network code is not dynamic
 
+import time
 import math
 import numpy as np
 
@@ -109,6 +110,7 @@ xor.test()
 print("\nxor.WL1 = \n", xor.W_L1)
 print("\nxor.WL2 = ", xor.W_L2)
 
+start_time = time.time()
 epoch = 0
 while epoch < 25_000:
     i = 0
@@ -120,8 +122,11 @@ while epoch < 25_000:
         # print("xor(", in_x1, ", ", in_x2, ") : target = ", xor.training_output[i])
         i += 1
     epoch += 1
+end_time = time.time()
 
 print("final test:\n")
 xor.test()
 print("\nxor.WL1 = \n", xor.W_L1)
 print("\nxor.WL2 = ", xor.W_L2)
+
+print("--- %s seconds ---" % (end_time - start_time))
