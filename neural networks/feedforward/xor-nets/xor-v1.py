@@ -24,12 +24,12 @@ def cost_dy_pred(y_pred, y_target):
 
 class xor_net:
     def __init__(self, w1, w2, w3, w4, w5, w6, alpha):
-        self.W_L1 = np.array([
+        self.W1 = np.array([
             [w1, w2],
             [w3, w4]
         ])
 
-        self.W_L2 = np.array([
+        self.W2 = np.array([
             [w5, w6]
         ])
 
@@ -44,56 +44,88 @@ class xor_net:
             [x2]
         ])
 
-        self.Z1 = np.dot(self.W_L1, self.X)
-        self.A1 = sigmoid_v(self.Z1)
+        # the result of the dot product function for layer 1
+        self.Z1 = np.dot(self.W1, self.X)
 
-        self.Z2 = np.dot(self.W_L2, self.A1)
-        self.A2 = sigmoid_v(self.Z2)
+        # the result of the activation function for the layer 1
+        self.Y1 = sigmoid_v(self.Z1)
 
-        return self.A2[0][0]
+        # the result of the dot product function for layer 2
+        self.Z2 = np.dot(self.W2, self.Y1)
+
+        # the result of the activation function for the layer 2
+        self.Y2 = sigmoid_v(self.Z2)
+
+        return self.Y2[0][0]
 
     def backpropagation(self, target_y):
-        cost_Al2_dx = cost_dy_pred(self.A2[0][0], target_y)
-        Al2_Zl2_dx = sigmoid_dx(self.Z2[0][0])
-        Zl2_Wl2_dx = self.A1.T
-        Zl2_Al1_dx = self.W_L2.T
 
-        cost_Wl2_dx = cost_Al2_dx * Al2_Zl2_dx * Zl2_Wl2_dx
-        New_W_L2 = self.W_L2 - (self.alpha * cost_Wl2_dx)
+        # get the partial derivative(s) of the cost function with respect to the
+        # input(s) (which is the result(s) of the last activation function)
+        dx_COST_Y2 = cost_dy_pred(self.Y2[0][0], target_y)
 
-        cost_Al1_dx = cost_Al2_dx * Al2_Zl2_dx * Zl2_Al1_dx
-        Al1_Zl1_dx = sigmoid_dx_v(self.Z1)
-        Zl1_Wl1_dx = np.array([self.X.flatten(), self.X.flatten()])
-        
-        cost_Wl1_dx = cost_Al1_dx * Al1_Zl1_dx * Zl1_Wl1_dx
-        New_W_L1 = self.W_L1 - (self.alpha * cost_Wl1_dx)
-        
-        # print("cost_Wl1_dx = ", cost_Wl1_dx)
-        # print("cost_Al2_dx = ", cost_Al2_dx)
-        # print("Al2_Zl2_dx  = ", Al2_Zl2_dx)
-        # print("Zl2_Wl2_dx  = ", Zl2_Wl2_dx)
-        # print("Zl2_Al1_dx  = \n", Zl2_Al1_dx)
-        # print("cost_Wl2_dx = ", cost_Wl2_dx)
-        # print("cost_Al1_dx = \n", cost_Al1_dx)
-        # print("Al1_Zl1_dx  = \n", Al1_Zl1_dx)
-        # print("Zl1_Wl1_dx  = \n", Zl1_Wl1_dx)
+        #----------------------------------------------------------------------------------------------------------------------------
 
-        self.W_L1 = New_W_L1
-        self.W_L2 = New_W_L2
-        
-        # print("New_W_L1+   = \n", self.W_L1)
-        # print("New_W_L2+   = ", self.W_L2) 
+        # get the partial derivative(s) of the activation function
+        # with respect to it's input(s) (the current layer's dot product result).
+        dx_Y2_Z2 = sigmoid_dx(self.Z2[0][0])
+
+        # get the parital derivative of the cost function with respect to dot product
+        # function as input along the computational graph (THIS IS CHAIN RULE!)
+        dx_COST_Z2 = np.array([[dx_COST_Y2 * dx_Y2_Z2]]) # a 1x1 matrix
+
+        # get the partial derivatives of the dot product
+        # function with respect to the weights as input
+        dx_Z2_W2 = self.Y1
+
+        # multiply the partial derivatives together to get the partial derivatives of the
+        # cost function with respect to the current weights of the layer (THIS IS CHAIN RULE!)
+        dx_COST_W2 = np.outer(dx_COST_Z2, dx_Z2_W2)
+
+        # get the new weights by stepping by an "alpha" through the direction of the gradients
+        NEW_W2 = self.W2 - (self.alpha * dx_COST_W2)
+
+        # get the partial derivative of the dot product function with
+        # respect to the current input nodes as input
+        dx_Z2_Y1 = self.W2.T
+
+        # the old weight won't be used to any calculations anymore
+        # so we update the current weight with the new one
+        self.W2 = NEW_W2
+
+        # get the total derivatives of the cost function with respect to each input nodes for the
+        # current layer so that we can propagate it to the previous layer. (THIS IS CHAIN RULE!)
+        dx_COST_Y1 = np.dot(dx_Z2_Y1, dx_COST_Z2)
+
+        #----------------------------------------------------------------------------------------------------------------------------
+
+        # follow the same steps above for the current layer
+
+        dx_Y1_Z1 = sigmoid_dx_v(self.Z1)
+
+        dx_COST_Z1 = dx_COST_Y1 * dx_Y1_Z1
+
+        dx_Z1_W1 = self.X
+    
+        dx_COST_W1 = np.outer(dx_COST_Z1, dx_Z1_W1)
+
+        NEW_W1 = self.W1 - (self.alpha * dx_COST_W1)
+
+        self.W1 = NEW_W1
+
+        # unlike in the previous layer, here we don't need to do the 3rd to the last
+        # and the last line of code because there is no previous layer to propagate on
     
     def print_last_iteration_stat(self):
         print("x    = \n", self.X)
-        print("W_L1 = \n", self.W_L1)
+        print("W_L1 = \n", self.W1)
         
         print("\nZ1 = \n", self.Z1)
-        print("A1 = \n", self.A1)
-        print("W_L2 = ", self.W_L2)
+        print("A1 = \n", self.Y1)
+        print("W_L2 = ", self.W2)
         
         print("\nZ2 = ", self.Z2)
-        print("A2 = ", self.A2)
+        print("A2 = ", self.Y2)
 
     def test(self):
         i = 0
@@ -107,8 +139,8 @@ xor = xor_net(0.5, 0.9, 0.1, 0.75, 0.85, 0.2, 0.19)
 
 print("initial test:")
 xor.test()
-print("\nxor.WL1 = \n", xor.W_L1)
-print("\nxor.WL2 = ", xor.W_L2)
+print("\nxor.WL1 = \n", xor.W1)
+print("\nxor.WL2 = ", xor.W2)
 
 start_time = time.time()
 epoch = 0
@@ -126,7 +158,7 @@ end_time = time.time()
 
 print("final test:\n")
 xor.test()
-print("\nxor.WL1 = \n", xor.W_L1)
-print("\nxor.WL2 = ", xor.W_L2)
+print("\nxor.WL1 = \n", xor.W1)
+print("\nxor.WL2 = ", xor.W2)
 
 print("--- %s seconds ---" % (end_time - start_time))
