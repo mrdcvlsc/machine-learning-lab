@@ -5,6 +5,9 @@ import math
 import numpy as np
 from numpy._typing import NDArray
 
+LEARNING_RATE = 0.55
+EPOCH = 2_000
+
 def sigmoid(x):
     return 1.0 / (1.0 + math.exp(-x))
 
@@ -62,10 +65,14 @@ class AffineLayer:
             Initialize with biases.
         """
 
-        self.weights = np.random.uniform(low=min, high=max, size=(outputs, inputs))
+        self.W = np.random.uniform(low=min, high=max, size=(outputs, inputs))
+        '''Layer Weights'''
+
+        self.hasBias = hasBias
 
         if hasBias:
-            self.bias = np.ones(shape=(outputs, 1))
+            self.B = np.ones(shape=(outputs, 1))
+            '''Layer Biases'''
 
     def forward(self, inputNodes):
         """
@@ -86,7 +93,12 @@ class AffineLayer:
         """
         
         self.X = inputNodes
-        self.Z = np.dot(self.weights, self.X)
+
+        if self.hasBias:
+            self.Z = np.dot(self.W, self.X) + self.B
+        else:
+            self.Z = np.dot(self.W, self.X)
+
         return self.Z
 
     def propagate(self, dxCost_previous_Z, alpha):
@@ -101,7 +113,7 @@ class AffineLayer:
             An `Nx1` numpy array matrix that is the partial
             derivative of the cost function with respect
             to the previous non-activated output nodes or
-            dot product function.
+            dot product function inputs.
         
         `alpha` : `float`
             The learning rate of the current layer use for SDG.
@@ -117,10 +129,17 @@ class AffineLayer:
         dx_Z_W = self.X
         dx_Cost_W = np.outer(dxCost_previous_Z, dx_Z_W)
         
-        dx_Z_X = self.weights.T
+        dx_Z_X = self.W.T
         dx_Cost_X = np.dot(dx_Z_X, dxCost_previous_Z)
 
-        self.weights = self.weights - (alpha * dx_Cost_W)
+        self.W = self.W - (alpha * dx_Cost_W)
+
+        if self.hasBias:
+            # the partial derivatives of the dot product function with respect to the bias
+            # are just 1s, so there's no need to multiply 1s to the partial derivatives of
+            # the cost function with respect to the input Z (dot product function inputs result) to save computation.
+            dx_Cost_B = dxCost_previous_Z
+            self.B = self.B - (alpha * dx_Cost_B)
 
         return dx_Cost_X
 
@@ -129,15 +148,15 @@ class MyXorNet:
     def __init__(self, LearningRate):
         self.LearningRate = LearningRate
         
-        self.Layer1 = AffineLayer(2, 2)
-        self.Layer2 = AffineLayer(2, 1)
+        self.L1 = AffineLayer(2, 2, hasBias=True)
+        self.L2 = AffineLayer(2, 1, hasBias=True)
 
     # TODO: Make this an abstract function.
     def feedforward(self, x):
-        x = self.Layer1.forward(x)
+        x = self.L1.forward(x)
         x = sigmoid_v(x)
 
-        x = self.Layer2.forward(x)
+        x = self.L2.forward(x)
         x = sigmoid_v(x)
 
         return x
@@ -146,11 +165,11 @@ class MyXorNet:
     def backpropagate(self, y, target):
         dx_cost_Y = cost_dy_pred_v(y, target)
 
-        dx_cost_Z = dx_cost_Y * sigmoid_dx_v(self.Layer2.Z)
-        dx_cost_Y = self.Layer2.propagate(dx_cost_Z, alpha=self.LearningRate)
+        dx_cost_Z = dx_cost_Y * sigmoid_dx_v(self.L2.Z)
+        dx_cost_Y = self.L2.propagate(dx_cost_Z, alpha=self.LearningRate)
 
-        dx_cost_Z = dx_cost_Y * sigmoid_dx_v(self.Layer1.Z)
-        dx_cost_Y = self.Layer1.propagate(dx_cost_Z, alpha=self.LearningRate)
+        dx_cost_Z = dx_cost_Y * sigmoid_dx_v(self.L1.Z)
+        dx_cost_Y = self.L1.propagate(dx_cost_Z, alpha=self.LearningRate)
     
     def test(self):
         i = 0
@@ -160,25 +179,27 @@ class MyXorNet:
             print("xor(", trainingInput[i][0][0], ", ", trainingInput[i][1][0], ") = ", self.feedforward(trainingInput[i])[0][0])
             i += 1
 
-xor = MyXorNet(0.19)
+xor = MyXorNet(LEARNING_RATE)
 
-xor.Layer1.weights = np.array([
+xor.L1.W = np.array([
     [0.5, 0.9],
     [0.1, 0.75]
 ])
 
-xor.Layer2.weights = np.array([
+xor.L2.W = np.array([
     [0.85, 0.2]
 ])
 
 print("initial test:")
 xor.test()
-print("\nxor.WL1 = \n", xor.Layer1.weights)
-print("\nxor.WL2 = ", xor.Layer2.weights)
+print("\nxor.WL1 = \n", xor.L1.W)
+print("\nxor.WL2 = ", xor.L2.W)
+print("\nxor.B1 = ", xor.L1.B)
+print("\nxor.B2 = ", xor.L2.B)
 
 start_time = time.time()
 epoch = 0
-while epoch < 25_000:
+while epoch < EPOCH:
     i = 0
     while i < 4:
         y = xor.feedforward(trainingInput[i])
@@ -190,7 +211,9 @@ end_time = time.time()
 
 print("final test:\n")
 xor.test()
-print("\nxor.WL1 = \n", xor.Layer1.weights)
-print("\nxor.WL2 = ", xor.Layer2.weights)
+print("\nxor.WL1 = \n", xor.L1.W)
+print("\nxor.WL2 = ", xor.L2.W)
+print("\nxor.B1 = ", xor.L1.B)
+print("\nxor.B2 = ", xor.L2.B)
 
 print("--- %s seconds ---" % (end_time - start_time))
