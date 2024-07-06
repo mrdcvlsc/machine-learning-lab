@@ -133,18 +133,6 @@ class xor_net:
             # of the cost function /w respect to the Y for the next previous layer
             dx_cost_Y = np.dot(dx_Z_X, dx_cost_Z)
             l += 1
-        
-    
-    def print_last_iteration_stat(self):
-        print("x    = \n", self.Y[0])
-        print("W_L1 = \n", self.W[0])
-        
-        print("\nZ1 = \n", self.Z[0])
-        print("A1 = \n", self.Y[1])
-        print("W_L2 = ", self.W[1])
-        
-        print("\nZ2 = ", self.Z[2])
-        print("A2 = ", self.Y[3])
 
     def test(self):
         i = 0

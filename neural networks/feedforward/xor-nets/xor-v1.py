@@ -115,17 +115,6 @@ class xor_net:
 
         # unlike in the previous layer, here we don't need to do the 3rd to the last
         # and the last line of code because there is no previous layer to propagate on
-    
-    def print_last_iteration_stat(self):
-        print("x    = \n", self.X)
-        print("W_L1 = \n", self.W1)
-        
-        print("\nZ1 = \n", self.Z1)
-        print("A1 = \n", self.Y1)
-        print("W_L2 = ", self.W2)
-        
-        print("\nZ2 = ", self.Z2)
-        print("A2 = ", self.Y2)
 
     def test(self):
         i = 0

@@ -106,17 +106,6 @@ class xor_net:
             np.subtract(self.W[len(self.W) - 1 - l], self.DX_W[len(self.W) - 1 - l], out=self.W[len(self.W) - 1 - l])
 
             l += 1
-    
-    def print_last_iteration_stat(self):
-        print("x    = \n", self.Y[0])
-        print("W_L1 = \n", self.W[0])
-        
-        print("\nZ1 = \n", self.Z[0])
-        print("A1 = \n", self.Y[1])
-        print("W_L2 = ", self.W[1])
-        
-        print("\nZ2 = ", self.Z[2])
-        print("A2 = ", self.Y[3])
 
     def test(self):
         i = 0
