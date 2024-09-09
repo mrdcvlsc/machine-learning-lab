@@ -58,12 +58,14 @@ class xor_net:
         cost = loss(self.Y2, torch.tensor([[target_y]], dtype=torch.float64))
         cost.backward()
 
+        # equivalent to optimizer.step()
         with torch.no_grad():
             self.W2 -= self.W2.grad * self.alpha
             self.B2 -= self.B2.grad * self.alpha
             self.W1 -= self.W1.grad * self.alpha
             self.B1 -= self.B1.grad * self.alpha
 
+        # equivalent to optimizer.zero_grad()
         self.W2.grad.zero_()
         self.B2.grad.zero_()
         self.W1.grad.zero_()
