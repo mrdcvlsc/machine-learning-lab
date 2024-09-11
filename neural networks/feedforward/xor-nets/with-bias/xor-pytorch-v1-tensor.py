@@ -1,4 +1,4 @@
-# pytorch implementation using only it's torch.tenssor with auto-grad
+# pytorch implementation using only it's torch.tenssor and auto-grad
 
 import torch
 import time
@@ -12,7 +12,7 @@ def tnsr_to_np(t: torch.Tensor):
 def tnsr_to_np_int(t: torch.Tensor):
     return tnsr_to_np(t).astype(int)
 
-class xor_net:
+class XorNet:
     def __init__(self, w1, w2, w3, w4, w5, w6, alpha):
         self.W1 = torch.tensor([
             [w1, w2],
@@ -27,7 +27,7 @@ class xor_net:
 
         self.B2 = torch.ones((1, 1), requires_grad=True, dtype=torch.float64)
 
-        self.alpha = torch.tensor(alpha, dtype=torch.float64)
+        self.alpha = alpha
         
         # inputs and target outputs does not require gradients
         self.training_input = torch.tensor([[0, 0], [0, 1] , [1, 0], [1, 1]]).double()
@@ -53,23 +53,25 @@ class xor_net:
 
         return self.Y2[0, 0]
 
-    def backpropagation_V2(self, target_y):
+    def backpropagation(self, target_y):
+
         loss = torch.nn.MSELoss()
-        cost = loss(self.Y2, torch.tensor([[target_y]], dtype=torch.float64))
+
+        cost: torch.Tensor = loss(self.Y2, torch.tensor([[target_y]], dtype=torch.float64))
+
         cost.backward()
 
-        # equivalent to optimizer.step()
-        with torch.no_grad():
-            self.W2 -= self.W2.grad * self.alpha
-            self.B2 -= self.B2.grad * self.alpha
-            self.W1 -= self.W1.grad * self.alpha
-            self.B1 -= self.B1.grad * self.alpha
+        self.W2 = self.W2.detach() - (self.W2.grad * self.alpha)
+        self.B2 = self.B2.detach() - (self.B2.grad * self.alpha)
 
-        # equivalent to optimizer.zero_grad()
-        self.W2.grad.zero_()
-        self.B2.grad.zero_()
-        self.W1.grad.zero_()
-        self.B1.grad.zero_()
+        self.W2.requires_grad = True
+        self.B2.requires_grad = True
+
+        self.W1 = self.W1.detach() - (self.W1.grad * self.alpha)
+        self.B1 = self.B1.detach() - (self.B1.grad * self.alpha)
+
+        self.W1.requires_grad = True
+        self.B1.requires_grad = True
 
     def test(self):
         i = 0
@@ -79,7 +81,7 @@ class xor_net:
             print("xor(", tnsr_to_np_int(in_x1), ", ", tnsr_to_np_int(in_x2), ") = ", tnsr_to_np(self.feedforward(in_x1, in_x2)))
             i += 1
 
-xor = xor_net(0.5, 0.9, 0.1, 0.75, 0.85, 0.2, LEARNING_RATE)
+xor = XorNet(0.5, 0.9, 0.1, 0.75, 0.85, 0.2, LEARNING_RATE)
 
 print("initial test:")
 xor.test()
@@ -96,7 +98,7 @@ while epoch < EPOCH:
         in_x1 = xor.training_input[i, 0]
         in_x2 = xor.training_input[i, 1]
         xor.feedforward(in_x1, in_x2)
-        xor.backpropagation_V2(xor.training_output[i])
+        xor.backpropagation(xor.training_output[i])
         # print("xor(", in_x1, ", ", in_x2, ") : target = ", xor.training_output[i])
         i += 1
     epoch += 1

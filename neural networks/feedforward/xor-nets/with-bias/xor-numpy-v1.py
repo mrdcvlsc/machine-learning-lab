@@ -25,7 +25,7 @@ def cost(y_pred, y_target):
 def cost_dy_pred(y_pred, y_target):
     return 2*(y_pred - y_target)
 
-class xor_net:
+class XorNet:
     def __init__(self, w1, w2, w3, w4, w5, w6, alpha):
         self.W1 = np.array([
             [w1, w2],
@@ -139,7 +139,7 @@ class xor_net:
             print("xor(", in_x1, ", ", in_x2, ") = ", self.feedforward(in_x1, in_x2))
             i += 1
 
-xor = xor_net(0.5, 0.9, 0.1, 0.75, 0.85, 0.2, LEARNING_RATE)
+xor = XorNet(0.5, 0.9, 0.1, 0.75, 0.85, 0.2, LEARNING_RATE)
 # xor = xor_net(0, 0, 0, 0, 0, 0, 0.5)
 
 print("initial test:")
